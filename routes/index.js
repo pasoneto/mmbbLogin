@@ -36,10 +36,12 @@ router.get('/', function (req, res, next) {
 
   var lang = req.query.lang;
   var studyID = req.query.studyID;
+  var uniqueID = req.query.uniqueID;
 
   console.log(clientId);
   console.log(lang)
   console.log(studyID)
+  console.log(uniqueID)
 
   if(lang==undefined){
     var lang = "eng"
@@ -47,6 +49,14 @@ router.get('/', function (req, res, next) {
   if(studyID==undefined){
     var studyID= "main"
   }
+  if(uniqueID==undefined){
+    var uniqueID= "unknown"
+  }
+
+  req.session.lang=lang;
+  req.session.studyID=studyID;
+  req.session.uniqueID=uniqueID;
+
   //res.render('index', {user: req.session.user, title: 'Test', clientId: clientId, challenge: challenge, stateValue: stateValue, fusionAuthURL: fusionAuthURL});
 
   //Directly to auth page
@@ -67,14 +77,18 @@ router.get('/postreg', function (req, res, next) {
   const challenge = pkce_pair['code_challenge'];
   console.log(clientId);
 
-  var lang = req.query.lang;
-  var studyID = req.query.studyID;
+  var lang = req.session.lang;
+  var studyID = req.session.studyID;
+  var uniqueID = req.query.uniqueID;
+  //var lang = req.query.lang;
+  //var studyID = req.query.studyID;
 
   console.log(lang)
   console.log(studyID)
+  console.log(uniqueID)
 
   //Directly to auth page
-  res.redirect(302, 'https://mmbb.ltdk.helsinki.fi:9111/oauth2/authorize?client_id='+clientId+'&response_type=code&redirect_uri=https%3A%2F%2Fmmbb.ltdk.helsinki.fi%2Foauth-redirect&scope=offline_access&state='+stateValue+'&code_challenge='+challenge+'&code_challenge_method=S256'+'&lang='+lang+'&studyID='+studyID);
+  res.redirect(302, 'https://mmbb.ltdk.helsinki.fi:9111/oauth2/authorize?client_id='+clientId+'&response_type=code&redirect_uri=https%3A%2F%2Fmmbb.ltdk.helsinki.fi%2Foauth-redirect&scope=offline_access&state='+stateValue+'&code_challenge='+challenge+'&code_challenge_method=S256'+'&lang='+lang+'&studyID='+studyID+'&uniqueID='+uniqueID);
 
 });
 
@@ -91,11 +105,15 @@ router.get('/oauth-redirect', function (req, res, next) {
   }
 
   console.log("Parameters here:")
-  var lang = req.query.lang;
-  var studyID = req.query.studyID;
+  var lang = req.session.lang;
+  var studyID = req.session.studyID;
+  var uniqueID = req.session.uniqueID;
+  //var lang = req.query.lang;
+  //var studyID = req.query.studyID;
 
   console.log(lang)
   console.log(studyID)
+  console.log(uniqueID)
 
 // tag::exchangeOAuthCode[]
 // This code stores the user in a server-side session
@@ -123,7 +141,7 @@ router.get('/oauth-redirect', function (req, res, next) {
         //var queryStringIndex = window.location.search;
         //var urlParamsIndex = new URLSearchParams(queryStringIndex);
 
-        res.redirect(302, '/chooseBattery.html?user=' + response.response.user.id + "&clientID=" + clientId + "&lang=" + lang + "&studyID=" + studyID);
+        res.redirect(302, '/chooseBattery.html?user=' + response.response.user.id + "&clientID=" + clientId + "&lang=" + lang + "&studyID=" + studyID + "&uniqueID=" + uniqueID);
 
       }).catch((err) => {console.log("in error"); 
         console.error(JSON.stringify(err));});
